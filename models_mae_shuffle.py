@@ -50,9 +50,9 @@ class MaskedAutoencoderViT(nn.Module):
 
         self.decoder_pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, decoder_embed_dim), requires_grad=False)  # fixed sin-cos embedding
 
-        self.decoder_blocks = nn.ModuleList([
-            Block(decoder_embed_dim, decoder_num_heads, mlp_ratio, qkv_bias=True, qk_scale=None, norm_layer=norm_layer)
-            for i in range(decoder_depth)])
+        # self.decoder_blocks = nn.ModuleList([
+        #     Block(decoder_embed_dim, decoder_num_heads, mlp_ratio, qkv_bias=True, qk_scale=None, norm_layer=norm_layer)
+        #     for i in range(decoder_depth)])
 
         self.decoder_norm = norm_layer(decoder_embed_dim)
         self.decoder_pred = nn.Linear(decoder_embed_dim, patch_size**2 * in_chans, bias=True) # decoder to patch
@@ -184,11 +184,11 @@ class MaskedAutoencoderViT(nn.Module):
         x = self.decoder_embed(x)
 
         # add pos embed
-        x = x + self.decoder_pos_embed + seg_embed.unsqueeze(-1)
+        # x = x + self.decoder_pos_embed + seg_embed.unsqueeze(-1)
 
         # apply Transformer blocks
-        for blk in self.decoder_blocks:
-            x = blk(x)
+        # for blk in self.decoder_blocks:
+        #     x = blk(x)
         x = self.decoder_norm(x)
 
         # predictor projection
