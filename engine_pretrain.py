@@ -36,16 +36,17 @@ def train_one_epoch(model: torch.nn.Module,
     if log_writer is not None:
         print('log_dir: {}'.format(log_writer.log_dir))
 
-    for data_iter_step, (samples, _) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
+    for data_iter_step, (aug_samples, target_samples) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
 
         # we use a per iteration (instead of per epoch) lr scheduler
         if data_iter_step % accum_iter == 0:
             lr_sched.adjust_learning_rate(optimizer, data_iter_step / len(data_loader) + epoch, args)
 
-        samples = samples.to(device, non_blocking=True)
+        aug_samples = aug_samples.to(device, non_blocking=True)
+        target_samples = target_samples.to(device, non_blocking=True)
 
         with torch.cuda.amp.autocast():
-            loss, _,_ = model(samples, mask_ratio=args.mask_ratio)
+            loss, _,_ = model(aug_samples, target_samples,mask_ratio=args.mask_ratio)
 
         loss_value = loss.item()
 

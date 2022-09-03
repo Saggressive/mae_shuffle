@@ -208,8 +208,9 @@ class MaskedAutoencoderViT(nn.Module):
         loss = loss.mean()  # [N, L], mean loss per patch
         return loss
 
-    def forward(self, imgs,mask_ratio=1):
-        latent = self.forward_encoder(imgs,mask_ratio)
+    def forward(self,augs_imgs, imgs,mask_ratio=1):
+
+        latent = self.forward_encoder(augs_imgs,mask_ratio)
         pred = self.forward_decoder(latent)  # [N, L, p*p*3]
         loss = self.forward_loss(imgs, pred)
         return loss, pred, latent

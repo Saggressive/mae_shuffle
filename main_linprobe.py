@@ -66,7 +66,7 @@ def get_args_parser():
                         help='epochs to warmup LR')
 
     # * Finetuning params
-    parser.add_argument('--finetune', default='/nlp_group/wuxing/suzhenpeng/mae_shuffle/output_dir/checkpoint-20.pth',
+    parser.add_argument('--finetune', default='/nlp_group/wuxing/gaochaochen/mae/output_dir/pretrain_base_rdma_fp16/checkpoint-100.pth',
                         help='finetune from checkpoint')
     parser.add_argument('--global_pool', action='store_true')
     parser.set_defaults(global_pool=False)
