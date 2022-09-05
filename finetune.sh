@@ -7,5 +7,5 @@ export NCCL_SOCKET_IFNAME=eth
 export NCCL_IB_HCA=mlx5
 
 nohup python -m torch.distributed.launch --nnodes=4 --master_addr=10.116.145.143 --node_rank=${node_rank}  --nproc_per_node=8   --master_port 23332  \
-    --use_env main_linprobe.py \
-    >./output_dir/linear_probe_output_dir/${node_rank}.log 2>&1 &
+    --use_env main_finetune.py \
+    >./output_dir/finetune_output_dir/${node_rank}.log 2>&1 &
