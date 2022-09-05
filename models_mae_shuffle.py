@@ -17,7 +17,7 @@ import torch.nn as nn
 from timm.models.vision_transformer import PatchEmbed, Block
 
 from util.pos_embed import get_2d_sincos_pos_embed
-
+from torch import nn
 
 class MaskedAutoencoderViT(nn.Module):
     """ Masked Autoencoder with VisionTransformer backbone
@@ -45,6 +45,7 @@ class MaskedAutoencoderViT(nn.Module):
         # --------------------------------------------------------------------------
         # MAE decoder specifics
         self.decoder_embed = nn.Linear(embed_dim, decoder_embed_dim, bias=True)
+        self.cls_head = nn.Linear(embed_dim, decoder_embed_dim, bias=True)
 
         self.mask_token = nn.Parameter(torch.zeros(1, 1, decoder_embed_dim))
 
@@ -55,7 +56,9 @@ class MaskedAutoencoderViT(nn.Module):
         #     for i in range(decoder_depth)])
 
         self.decoder_norm = norm_layer(decoder_embed_dim)
+        self.cls_norm = norm_layer(decoder_embed_dim)
         self.decoder_pred = nn.Linear(decoder_embed_dim, patch_size**2 * in_chans, bias=True) # decoder to patch
+        self.cls_pred = nn.Linear(decoder_embed_dim, patch_size**2, bias=True)
         # --------------------------------------------------------------------------
 
         self.norm_pix_loss = norm_pix_loss
@@ -170,7 +173,7 @@ class MaskedAutoencoderViT(nn.Module):
             x = blk(x)
         x = self.norm(x)
 
-        return x
+        return x,ids_shuffle
 
     def forward_decoder(self, x ):
         # embed tokens
@@ -191,6 +194,24 @@ class MaskedAutoencoderViT(nn.Module):
         x = x[:, 1:, :]
 
         return x
+    
+    def forward_classifaction_loss(self, x , ids_shuffle):
+        # embed tokens
+        x = self.cls_head(x)
+        x = self.cls_norm(x)
+        # predictor projection
+        x = self.cls_pred(x)
+
+        # remove cls token
+        x = x[:, 1:, :]
+
+        y_label=ids_shuffle.reshape(-1).long()
+        N,L,D=x.size()
+        y_hat=x.reshape(-1,D)
+
+        cross_func=nn.CrossEntropyLoss()
+        loss=cross_func(y_hat,y_label)
+        return loss
 
     def forward_loss(self, imgs, pred):
         """
@@ -208,11 +229,14 @@ class MaskedAutoencoderViT(nn.Module):
         loss = loss.mean()  # [N, L], mean loss per patch
         return loss
 
-    def forward(self,augs_imgs, imgs,mask_ratio=1):
+        loss = loss.mean(dim=-1)  # [N, L], mean loss per patch
 
-        latent = self.forward_encoder(augs_imgs,mask_ratio)
+    def forward(self,augs_imgs, imgs,mask_ratio=1):
+        
+        _lambda=0.005
+        latent,ids_shuffle = self.forward_encoder(augs_imgs,mask_ratio)
         pred = self.forward_decoder(latent)  # [N, L, p*p*3]
-        loss = self.forward_loss(imgs, pred)
+        loss = _lambda*self.forward_classifaction_loss(latent, ids_shuffle) + self.forward_loss(imgs, pred)
         return loss, pred, latent
 
 

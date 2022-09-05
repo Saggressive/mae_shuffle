@@ -38,7 +38,7 @@ from Imagenet_Dataset import Imagenet_Dataset
 
 def get_args_parser():
     parser = argparse.ArgumentParser('MAE pre-training', add_help=False)
-    parser.add_argument('--batch_size', default=256, type=int,
+    parser.add_argument('--batch_size', default=128, type=int,
                         help='Batch size per GPU (effective batch size is batch_size * accum_iter * # gpus')
     parser.add_argument('--epochs', default=800, type=int)
     parser.add_argument('--accum_iter', default=1, type=int,
@@ -76,9 +76,9 @@ def get_args_parser():
     parser.add_argument('--data_path', default='/share/a100/vig_pytorch/imagenet-2012', type=str,
                         help='dataset path')
 
-    parser.add_argument('--output_dir', default='./output_dir',
+    parser.add_argument('--output_dir', default='./output_dir/dirty_no_postion',
                         help='path where to save, empty for no saving')
-    parser.add_argument('--log_dir', default='./output_dir',
+    parser.add_argument('--log_dir', default='./output_dir/dirty_no_postion',
                         help='path where to tensorboard log')
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')
