@@ -109,7 +109,7 @@ def get_args_parser():
                         help='How to apply mixup/cutmix params. Per "batch", "pair", or "elem"')
 
     # * Finetuning params
-    parser.add_argument('--finetune', default='/nlp_group/wuxing/suzhenpeng/mae_shuffle/output_dir/dirty_output_dir/checkpoint-260.pth',
+    parser.add_argument('--finetune', default='/nlp_group/wuxing/gaochaochen/mae/output_dir/pretrain_base_rdma_fp16/checkpoint-799.pth',
                         help='finetune from checkpoint')
     parser.add_argument('--global_pool', action='store_true')
     parser.set_defaults(global_pool=True)
@@ -117,7 +117,7 @@ def get_args_parser():
                         help='Use class token instead of global pool for classification')
 
     # Dataset parameters
-    parser.add_argument('--data_path', default='/nlp_group/wuxing/suzhenpeng/mae/imagenet', type=str,
+    parser.add_argument('--data_path', default='/share/a100/vig_pytorch/imagenet-2012', type=str,
                         help='dataset path')
     parser.add_argument('--nb_classes', default=1000, type=int,
                         help='number of the classification types')
@@ -136,7 +136,7 @@ def get_args_parser():
                         help='start epoch')
     parser.add_argument('--eval', action='store_true',
                         help='Perform evaluation only')
-    parser.add_argument('--dist_eval', action='store_true', default=False,
+    parser.add_argument('--dist_eval', action='store_true', default=True,
                         help='Enabling distributed evaluation (recommended during training for faster monitor')
     parser.add_argument('--num_workers', default=10, type=int)
     parser.add_argument('--pin_mem', action='store_true',

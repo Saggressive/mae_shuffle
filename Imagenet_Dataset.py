@@ -33,7 +33,7 @@ class Imagenet_Dataset(Dataset):
     def __len__(self):
         return len(self.image_path)
 
-    def dirty(self,image,signal_pct=0.3,mean=0,std=0.05):
+    def dirty(self,image,signal_pct=0.6,mean=0,std=0.02):
         img = np.array(image).copy()
         img = img / 255.0
         noise = np.random.normal(mean, std, img.shape)
@@ -57,10 +57,11 @@ class Imagenet_Dataset(Dataset):
         image = Image.open(path).convert("RGB")
         image = self.transform_train(image)
         target=self.transform_target(image)
-        do_num=random.randint(0,1)
-        if do_num==0:
-            dirty_image = self.dirty(image)
-            aug = self.transform_aug(dirty_image)
-        else:
-            aug = self.transform_aug(image)
+        # do_num=random.randint(0,1)
+        # if do_num==0:
+        #     dirty_image = self.dirty(image)
+        #     aug = self.transform_aug(dirty_image)
+        # else:
+        #     aug = self.transform_aug(image)
+        aug = self.transform_aug(image)
         return aug,target

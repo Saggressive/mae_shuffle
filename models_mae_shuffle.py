@@ -18,7 +18,7 @@ from timm.models.vision_transformer import PatchEmbed, Block
 
 from util.pos_embed import get_2d_sincos_pos_embed
 from torch import nn
-
+import random
 class MaskedAutoencoderViT(nn.Module):
     """ Masked Autoencoder with VisionTransformer backbone
     """
@@ -229,14 +229,13 @@ class MaskedAutoencoderViT(nn.Module):
         loss = loss.mean()  # [N, L], mean loss per patch
         return loss
 
-        loss = loss.mean(dim=-1)  # [N, L], mean loss per patch
 
     def forward(self,augs_imgs, imgs,mask_ratio=1):
         
         _lambda=0.005
         latent,ids_shuffle = self.forward_encoder(augs_imgs,mask_ratio)
         pred = self.forward_decoder(latent)  # [N, L, p*p*3]
-        loss = _lambda*self.forward_classifaction_loss(latent, ids_shuffle) + self.forward_loss(imgs, pred)
+        loss = self.forward_classifaction_loss(latent, ids_shuffle)*_lambda + self.forward_loss(imgs, pred)
         return loss, pred, latent
 
 
