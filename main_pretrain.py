@@ -30,7 +30,8 @@ import timm.optim.optim_factory as optim_factory
 import util.misc as misc
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
 
-import models_mae_shuffle as models_mae
+# import models_mae_shuffle as models_mae
+import models_mae
 
 from engine_pretrain import train_one_epoch
 
@@ -51,7 +52,7 @@ def get_args_parser():
     parser.add_argument('--input_size', default=224, type=int,
                         help='images input size')
 
-    parser.add_argument('--mask_ratio', default=1, type=float,
+    parser.add_argument('--mask_ratio', default=0.75, type=float,
                         help='Masking ratio (percentage of removed patches).')
 
     parser.add_argument('--norm_pix_loss', action='store_true',
@@ -121,13 +122,13 @@ def main(args):
     cudnn.benchmark = True
 
     # simple augmentation
-    # transform_train = transforms.Compose([
-    #         transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
-    #         transforms.RandomHorizontalFlip(),
-    #         transforms.ToTensor(),
-    #         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
-    # dataset_train = datasets.ImageFolder(os.path.join(args.data_path, 'train'), transform=transform_train)
-    dataset_train = Imagenet_Dataset(args.data_path+os.sep+"train", args.input_size)
+    transform_train = transforms.Compose([
+            transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+    dataset_train = datasets.ImageFolder(os.path.join(args.data_path, 'train'), transform=transform_train)
+    # dataset_train = Imagenet_Dataset(args.data_path+os.sep+"train", args.input_size)
     print(dataset_train)
 
     if True:  # args.distributed:

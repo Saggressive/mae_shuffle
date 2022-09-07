@@ -47,7 +47,7 @@ class MaskedAutoencoderViT(nn.Module):
         self.decoder_embed = nn.Linear(embed_dim, decoder_embed_dim, bias=True)
         self.cls_head = nn.Linear(embed_dim, decoder_embed_dim, bias=True)
 
-        self.mask_token = nn.Parameter(torch.zeros(1, 1, decoder_embed_dim))
+        self.mask_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
 
         self.decoder_pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, decoder_embed_dim), requires_grad=False)  # fixed sin-cos embedding
 
@@ -156,11 +156,10 @@ class MaskedAutoencoderViT(nn.Module):
         # sort noise for each sample
         ids_shuffle = torch.argsort(noise, dim=1)  # ascend: small is keep, large is remove
         ids_restore = torch.argsort(ids_shuffle, dim=1)
-        x_masked = torch.gather(x, dim=1, index=ids_shuffle.unsqueeze(-1).repeat(1, 1, D))
+        x_masked_new = torch.gather(x_masked, dim=1, index=ids_shuffle.unsqueeze(-1).repeat(1, 1, D))
         mask = torch.gather(mask, dim=1, index=ids_shuffle)
         
-
-        return x_masked, mask, ids_shuffle
+        return x_masked_new, mask, ids_shuffle
 
     def forward_encoder(self, x, mask_ratio):
         # embed patches
@@ -199,7 +198,7 @@ class MaskedAutoencoderViT(nn.Module):
 
         return x
 
-    def forward_classifaction_loss(self, x , ids_shuffle):
+    def forward_classifaction_loss(self, x , mask,ids_shuffle):
         # embed tokens
         x = self.cls_head(x)
         x = self.cls_norm(x)
@@ -213,8 +212,10 @@ class MaskedAutoencoderViT(nn.Module):
         N,L,D=x.size()
         y_hat=x.reshape(-1,D)
 
-        cross_func=nn.CrossEntropyLoss()
+        cross_func=nn.CrossEntropyLoss(reduction='none')
         loss=cross_func(y_hat,y_label)
+        loss=loss.view(N,L)
+        loss = (loss * mask).sum() / mask.sum()
         return loss
 
     def forward_loss(self, imgs, pred, mask):
@@ -236,10 +237,10 @@ class MaskedAutoencoderViT(nn.Module):
 
     def forward(self, imgs, mask_ratio=0.75):
 
-        _lambda=0.005
+        _lambda=0.01
         latent, mask, ids_shuffle = self.forward_encoder(imgs, mask_ratio)
         pred = self.forward_decoder(latent)  # [N, L, p*p*3]
-        loss = self.forward_classifaction_loss(latent, ids_shuffle)*_lambda+self.forward_loss(imgs, pred, mask)
+        loss = self.forward_classifaction_loss(latent,mask, ids_shuffle)*_lambda+self.forward_loss(imgs, pred, mask)
         return loss, pred, mask
 
 
