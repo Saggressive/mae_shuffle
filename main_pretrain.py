@@ -51,12 +51,12 @@ def get_args_parser():
     parser.add_argument('--input_size', default=224, type=int,
                         help='images input size')
 
-    parser.add_argument('--mask_ratio', default=1, type=float,
+    parser.add_argument('--mask_ratio', default=0.9, type=float,
                         help='Masking ratio (percentage of removed patches).')
 
     parser.add_argument('--norm_pix_loss', action='store_true',
                         help='Use (per-patch) normalized pixels as targets for computing loss')
-    parser.set_defaults(norm_pix_loss=True)
+    parser.set_defaults(norm_pix_loss=False)
 
     # Optimizer parameters
     parser.add_argument('--weight_decay', type=float, default=0.05,
@@ -76,9 +76,9 @@ def get_args_parser():
     parser.add_argument('--data_path', default='/share/a100/vig_pytorch/imagenet-2012', type=str,
                         help='dataset path')
 
-    parser.add_argument('--output_dir', default='./output_dir/dirty_no_postion',
+    parser.add_argument('--output_dir', default='./output_dir/decoder_no_postion',
                         help='path where to save, empty for no saving')
-    parser.add_argument('--log_dir', default='./output_dir/dirty_no_postion',
+    parser.add_argument('--log_dir', default='./output_dir/decoder_no_postion',
                         help='path where to tensorboard log')
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')

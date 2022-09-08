@@ -9,5 +9,9 @@ export NCCL_IB_HCA=mlx5
 
 
 nohup python -m torch.distributed.launch --nnodes=2 --master_addr=10.116.147.13 --node_rank=${node_rank}  --nproc_per_node=8   --master_port 23332  \
-    --use_env main_linprobe.py \
-    >./output_dir/linear_probe_output_dir/${node_rank}.log 2>&1 &
+    --use_env main_linprobe.py  \
+    --finetune output_dir/decoder_no_postion/checkpoint-20.pth \
+    --output_dir ./output_dir/debug \
+    --log_dir ./output_dir/debug \
+    --accum_iter 2 \
+    >./output_dir/debug/${node_rank}.log 2>&1 &
